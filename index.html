@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexora | Automatización Estratégica con n8n + IA</title>
+  <meta name="description" content="Automatización inteligente con n8n + IA: elimina tareas manuales, integra tus herramientas y escala operaciones sin sumar fricción." />
+  <meta name="theme-color" content="#030712" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome (necesario porque usas <i class="fas ...">) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root { color-scheme: dark; }
+
+    .glass {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .soft-ring { box-shadow: 0 0 0 1px rgba(255,255,255,.10) inset; }
+    .gradient-text {
+      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* WhatsApp pill button (top bar) */
+    .wa-nav-pill{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 9999px;
+
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .2px;
+      text-decoration: none;
+
+      color: #25D366;
+
+      background: rgba(37, 211, 102, .10);
+      border: 1px solid rgba(37, 211, 102, .28);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+
+      box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset;
+
+      transition:
+        background-color .2s ease,
+        border-color .2s ease,
+        box-shadow .2s ease,
+        transform .2s ease;
+    }
+
+    .wa-nav-pill:hover{
+      background: rgba(37, 211, 102, .16);
+      border-color: rgba(37, 211, 102, .38);
+      transform: translateY(-1px);
+      box-shadow:
+        0 10px 30px rgba(0,0,0,.35),
+        0 0 0 1px rgba(255,255,255,.08) inset;
+    }
+
+    .wa-nav-pill:focus-visible{
+      outline: none;
+      box-shadow:
+        0 0 0 2px rgba(37,211,102,.35),
+        0 0 0 6px rgba(37,211,102,.15);
+    }
+
+    /* ====== Clases que estabas usando pero no estaban definidas ====== */
+
+    /* Reveal: el JS agrega .active cuando entra en viewport */
+    .reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity .7s ease, transform .7s ease;
+      will-change: opacity, transform;
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Lift: micro elevación on hover */
+    .lift {
+      transition: transform .25s ease, box-shadow .25s ease;
+      will-change: transform;
+    }
+    .lift:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 45px rgba(0,0,0,.35);
+    }
+
+    /* CTA glow suave */
+    .cta-glow {
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      transition: box-shadow .25s ease, transform .25s ease;
+    }
+    .cta-glow:hover {
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    }
+
+    /* Borde gradiente premium */
+    .gradient-border {
+      position: relative;
+    }
+    .gradient-border::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      padding: 1px;
+      border-radius: inherit;
+      background: linear-gradient(90deg, rgba(99,102,241,.45), rgba(168,85,247,.45), rgba(236,72,153,.45));
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: .75;
+    }
+
+    /* Fondos animados sutiles */
+    .animated-bg {
+      position: relative;
+      overflow: hidden;
+    }
+    .animated-bg::before,
+    .animated-bg::after {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 9999px;
+      filter: blur(70px);
+      opacity: .18;
+      z-index: 0;
+      background: radial-gradient(circle at 30% 30%, rgba(99,102,241,.9), transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(236,72,153,.9), transparent 60%);
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .animated-bg::before { top: -220px; left: -220px; }
+    .animated-bg::after  { bottom: -240px; right: -240px; animation-duration: 22s; }
+
+    @keyframes drift {
+      from { transform: translate3d(0,0,0) scale(1); }
+      to   { transform: translate3d(40px, 25px, 0) scale(1.06); }
+    }
+
+    /* Hero grid fade */
+    .grid-fade {
+      position: relative;
+      overflow: hidden;
+    }
+    .grid-fade::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(99,102,241,.20), transparent 55%),
+        radial-gradient(900px 500px at 80% 20%, rgba(168,85,247,.18), transparent 55%),
+        radial-gradient(800px 500px at 60% 80%, rgba(236,72,153,.14), transparent 55%),
+        linear-gradient(to bottom, rgba(2,6,23,0), rgba(2,6,23,1));
+      pointer-events: none;
+    }
+
+    /* Orb float (las bolitas del hero) */
+    .floaty { animation: floaty 12s ease-in-out infinite; }
+    .floaty-delay { animation: floaty 14s ease-in-out infinite; animation-delay: -3s; }
+    @keyframes floaty {
+      0%, 100% { transform: translate3d(0,0,0); }
+      50% { transform: translate3d(0,-10px,0); }
+    }
+
+    /* Reduce motion: apaga lo que tenga sentido */
+    @media (prefers-reduced-motion: reduce){
+      .wa-nav-pill,
+      .wa-nav-pill:hover{
+        transition: none !important;
+        transform: none !important;
+      }
+      .reveal, .lift, .cta-glow,
+      .animated-bg::before, .animated-bg::after,
+      .floaty, .floaty-delay{
+        transition: none !important;
+        animation: none !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 selection:bg-fuchsia-500/30 selection:text-white">
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-slate-950/70 backdrop-blur border-b border-white/10">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex h-16 items-center justify-between">
+        <a href="#inicio" class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-xl glass soft-ring flex items-center justify-center">
+            <span class="font-extrabold text-lg gradient-text">N</span>
+          </div>
+          <div class="leading-tight">
+            <p class="font-semibold tracking-tight">Nexora</p>
+            <p class="text-xs text-slate-300">Automatización estratégica</p>
+          </div>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-6 text-sm text-slate-200">
+          <a class="hover:text-white" href="#problema">Problema</a>
+          <a class="hover:text-white" href="#tecnologia">Tecnología</a>
+          <a class="hover:text-white" href="#servicios">Servicios</a>
+          <a class="hover:text-white" href="#casos">Casos de uso</a>
+          <a class="hover:text-white" href="#proceso">Proceso</a>
+          <a class="hover:text-white" href="#roi">ROI</a>
+          <a class="hover:text-white" href="#faq">FAQ</a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <a href="#casos" class="hidden sm:inline-flex px-4 py-2 rounded-xl glass soft-ring text-sm hover:bg-white/10 transition">
+            Ver casos de uso
+          </a>
+
+          <!-- WhatsApp button -->
+          <a
+            href="https://wa.me/34641178947"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="wa-nav-pill"
+          >
+            WhatsApp
+          </a>
+
+          <a href="#contacto" class="inline-flex px-4 py-2 rounded-xl bg-white text-slate-950 font-semibold text-sm hover:bg-slate-200 transition">
+            Solicitar consulta gratuita
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="inicio" class="grid-fade relative">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-20">
+      <div class="grid lg:grid-cols-12 gap-10 items-center">
+        <div class="lg:col-span-7 reveal active"> <div class="inline-flex items-center gap-2 rounded-full glass soft-ring px-4 py-2 text-xs text-slate-200 mb-6 hover:bg-white/5 transition cursor-default">
+            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            +100 workflows entregados • n8n self-hosted • IA aplicada
+          </div>
+
+          <h1 class="text-5xl sm:text-6xl font-extrabold tracking-tight leading-tight">
+            Automatización Inteligente: <br> <span class="gradient-text">elimina tareas manuales</span> y escala tus operaciones
+          </h1>
+
+          <p class="mt-6 text-lg text-slate-200 leading-relaxed max-w-2xl">
+            Conectamos tu ecosistema con <strong>n8n</strong> e <strong>Inteligencia Artificial</strong> para que tu equipo
+            deje de copiar/pegar, responda más rápido y se enfoque en lo que realmente genera valor: ventas, servicio y crecimiento.
+          </p>
+
+          <div class="mt-10 flex flex-col sm:flex-row gap-4">
+            <a href="#contacto" class="inline-flex justify-center px-8 py-4 rounded-xl bg-white text-slate-950 font-bold text-lg hover:bg-slate-100 transition hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transform hover:-translate-y-1">
+              Solicitar consulta gratuita
+            </a>
+            <a href="#casos" class="inline-flex justify-center px-8 py-4 rounded-xl glass soft-ring hover:bg-white/10 transition cta-glow text-lg">
+              Ver casos de uso
+            </a>
+          </div>
+
+          <div class="mt-12 grid sm:grid-cols-3 gap-4 text-sm text-slate-200">
+            <div class="glass soft-ring rounded-2xl p-4 lift cursor-default">
+              <p class="font-semibold text-white flex items-center gap-2"><i class="fas fa-bolt text-yellow-400"></i> Velocidad</p>
+              <p class="mt-1 opacity-80">Ciclos de días → minutos</p>
+            </div>
+            <div class="glass soft-ring rounded-2xl p-4 lift cursor-default">
+              <p class="font-semibold text-white flex items-center gap-2"><i class="fas fa-eye text-blue-400"></i> Control</p>
+              <p class="mt-1 opacity-80">Auditoría y trazabilidad</p>
+            </div>
+            <div class="glass soft-ring rounded-2xl p-4 lift cursor-default">
+              <p class="font-semibold text-white flex items-center gap-2"><i class="fas fa-lock text-emerald-400"></i> Privacidad</p>
+              <p class="mt-1 opacity-80">Self-hosted en tu infraestructura</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 relative">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl floaty"></div>
+            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-500/20 rounded-full blur-3xl floaty-delay"></div>
+
+          <div class="glass soft-ring rounded-3xl p-8 gradient-border relative z-10 lift">
+            <p class="text-sm text-slate-300 relative z-10 mb-4 uppercase tracking-wider font-bold">Indicador de autoridad</p>
+            <div class="grid grid-cols-2 gap-4 relative z-10">
+              <div class="rounded-2xl bg-black/40 soft-ring p-4 hover:bg-white/5 transition duration-300">
+                <p class="text-3xl font-extrabold gradient-text">+100</p>
+                <p class="text-sm text-slate-300 mt-1">Workflows entregados</p>
+              </div>
+              <div class="rounded-2xl bg-black/40 soft-ring p-4 hover:bg-white/5 transition duration-300">
+                <p class="text-3xl font-extrabold gradient-text">24/7</p>
+                <p class="text-sm text-slate-300 mt-1">Ejecución continua</p>
+              </div>
+              <div class="rounded-2xl bg-black/40 soft-ring p-4 hover:bg-white/5 transition duration-300">
+                <p class="text-3xl font-extrabold gradient-text">-90%</p>
+                <p class="text-sm text-slate-300 mt-1">Errores humanos</p>
+              </div>
+              <div class="rounded-2xl bg-black/40 soft-ring p-4 hover:bg-white/5 transition duration-300">
+                <p class="text-3xl font-extrabold gradient-text">≤90d</p>
+                <p class="text-sm text-slate-300 mt-1">Recuperación inversión</p>
+              </div>
+            </div>
+
+            <div class="mt-8 mb-6 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+            <p class="text-sm text-slate-200 leading-relaxed relative z-10">
+              <span class="font-semibold text-white">Nota:</span> si ya usas Zapier/Make, no hay drama:
+              integramos, migramos y dejamos tu operativa más robusta (sin depender de límites por ejecución).
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problema" class="py-24 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl reveal mx-auto text-center mb-16">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Tu equipo está quemando horas en lo que <br> <span class="gradient-text">una máquina haría en segundos</span></h2>
+        <p class="mt-6 text-lg text-slate-300 leading-relaxed">
+          El problema no es “falta de esfuerzo”. Es un sistema que obliga a trabajar manualmente: copiar datos,
+          contestar lo mismo, y operar con herramientas aisladas. Así no se escala: solo se contrata más gente para tapar fricción.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal">
+          <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
+             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5" /></svg>
+          </div>
+          <p class="font-bold text-white text-lg">Copiar datos</p>
+          <p class="mt-2 text-sm text-slate-300">Entre CRM, Excel, ERP, formularios, emails… y encima con errores.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal" style="transition-delay: 100ms;">
+           <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
+             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" /></svg>
+          </div>
+          <p class="font-bold text-white text-lg">Respuestas repetitivas</p>
+          <p class="mt-2 text-sm text-slate-300">Correos, reseñas, tickets, mensajes: mismos patrones, misma pérdida de tiempo.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal" style="transition-delay: 200ms;">
+           <div class="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center mb-4 text-pink-400">
+             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
+          </div>
+          <p class="font-bold text-white text-lg">Silos de datos</p>
+          <p class="mt-2 text-sm text-slate-300">Las herramientas no se hablan. Terminas “integrando” con personas.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal" style="transition-delay: 300ms;">
+           <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center mb-4 text-red-400">
+             <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" /></svg>
+          </div>
+          <p class="font-bold text-white text-lg">Escala falsa</p>
+          <p class="mt-2 text-sm text-slate-300">Creces y lo único que sube es el coste operativo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tecnologia" class="py-24 border-y border-white/5 bg-slate-950/60 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-12 gap-16 items-start">
+        <div class="lg:col-span-5 reveal sticky top-24">
+          <h2 class="text-4xl font-extrabold tracking-tight"><span class="gradient-text">El arsenal tecnologico</span></h2>
+          <p class="mt-6 text-slate-300 leading-relaxed text-lg">
+            No vendemos “conectar apps”. Diseñamos sistemas operativos internos:
+            automatización robusta + IA + lógica a medida para que tus procesos sean rápidos, verificables y escalables.
+          </p>
+        </div>
+
+        <div class="lg:col-span-7 grid gap-6">
+          <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border">
+            <h3 class="text-2xl font-bold text-white">Por qué n8n (vs Zapier/Make)</h3>
+            <ul class="mt-4 space-y-3 text-slate-300">
+              <li class="flex items-start gap-2"><span class="text-indigo-400">➜</span> Open Source: sin caja negra.</li>
+              <li class="flex items-start gap-2"><span class="text-indigo-400">➜</span> Self-hosted: privacidad y control total de datos.</li>
+              <li class="flex items-start gap-2"><span class="text-indigo-400">➜</span> Sin límites absurdos por ejecución: la escala no se penaliza.</li>
+            </ul>
+          </div>
+
+          <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border" style="transition-delay: 100ms;">
+            <h3 class="text-2xl font-bold text-white">IA integrada (el “cerebro”)</h3>
+            <p class="mt-4 text-slate-300 leading-relaxed">
+              Sumamos modelos como GPT-4/Claude para análisis de sentimiento, clasificación inteligente,
+              generación de respuestas y toma de decisiones proactivas (por ejemplo: priorizar leads calientes,
+              detectar churn o escalar incidencias).
+            </p>
+          </div>
+
+          <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border" style="transition-delay: 200ms;">
+            <h3 class="text-2xl font-bold text-white">Programación a medida</h3>
+            <p class="mt-4 text-slate-300 leading-relaxed">
+              Cuando los “nodos estándar” no alcanzan, resolvemos con <strong>JavaScript</strong> o <strong>Python</strong>:
+              parsing complejo, normalización de datos, validaciones, lógica de negocio, integraciones con APIs internas y más.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="servicios" class="py-24 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="flex items-end justify-between gap-6 flex-wrap mb-16">
+        <div class="max-w-3xl reveal">
+          <h2 class="text-3xl font-extrabold tracking-tight"><span class="gradient-text">Servicios principales</span></h2>
+          <p class="mt-4 text-slate-300 leading-relaxed">
+            Intervenimos donde duele: procesos, infraestructura, conectores y mantenimiento. Con foco en impacto y estabilidad.
+          </p>
+        </div>
+        <a href="#contacto" class="inline-flex px-6 py-3 rounded-xl bg-white text-slate-950 font-bold hover:bg-slate-200 transition cta-glow reveal hover:shadow-lg transform hover:-translate-y-1">
+          Pedir presupuesto
+        </a>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal group">
+          <h3 class="font-bold text-white text-lg group-hover:text-indigo-400 transition-colors">Workflows personalizados</h3>
+          <p class="mt-3 text-sm text-slate-300">Flujos diseñados según tu proceso real (no según la herramienta).</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal group" style="transition-delay: 100ms;">
+          <h3 class="font-bold text-white text-lg group-hover:text-purple-400 transition-colors">Infraestructura n8n</h3>
+          <p class="mt-3 text-sm text-slate-300">Instalación segura en servidores propios (o cloud) con buenas prácticas.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal group" style="transition-delay: 200ms;">
+          <h3 class="font-bold text-white text-lg group-hover:text-pink-400 transition-colors">Nodos personalizados</h3>
+          <p class="mt-3 text-sm text-slate-300">Conectores para APIs internas o herramientas sin integración nativa.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal group" style="transition-delay: 300ms;">
+          <h3 class="font-bold text-white text-lg group-hover:text-blue-400 transition-colors">Auditoría y soporte</h3>
+          <p class="mt-3 text-sm text-slate-300">Corrección de fallos, mantenimiento, observabilidad y mejora continua.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="casos" class="py-24 border-y border-white/5 bg-slate-950/60 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl reveal mx-auto text-center mb-16">
+        <h2 class="text-3xl font-extrabold tracking-tight"><span class="gradient-text">Casos de uso por sector</span></h2>
+        <p class="mt-4 text-slate-300 leading-relaxed">
+          Ejemplos típicos (adaptamos la arquitectura a tu stack): CRM, WhatsApp, facturación, ERP, Helpdesk, HRIS, Google/Microsoft, etc.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border">
+          <h3 class="text-xl font-bold flex items-center gap-2"><span class="text-2xl">💼</span> Ventas / CRM</h3>
+          <p class="mt-4 text-slate-300 text-sm leading-relaxed">
+            Nuevo lead en formulario → creación/actualización en CRM → scoring con IA → email personalizado →
+            asignación comercial → seguimiento automático → reporte diario.
+          </p>
+        </div>
+
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border" style="transition-delay: 100ms;">
+          <h3 class="text-xl font-bold flex items-center gap-2"><span class="text-2xl">💬</span> Atención al cliente (WhatsApp)</h3>
+          <p class="mt-4 text-slate-300 text-sm leading-relaxed">
+            Bot de WhatsApp Business API → respuestas FAQ → captura de datos → apertura de ticket →
+            derivación a humano solo si es necesario → encuesta de satisfacción.
+          </p>
+        </div>
+
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border">
+          <h3 class="text-xl font-bold flex items-center gap-2"><span class="text-2xl">💰</span> Finanzas</h3>
+          <p class="mt-4 text-slate-300 text-sm leading-relaxed">
+            Venta cerrada → factura automática → envío al cliente → registro contable → conciliación básica →
+            alertas de impago → tablero de KPIs.
+          </p>
+        </div>
+
+        <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border" style="transition-delay: 100ms;">
+          <h3 class="text-xl font-bold flex items-center gap-2"><span class="text-2xl">👥</span> Recursos humanos</h3>
+          <p class="mt-4 text-slate-300 text-sm leading-relaxed">
+            Alta de empleado → creación de cuentas → permisos → checklist onboarding →
+            envío de kit de bienvenida → recordatorios y documentación centralizada.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="proceso" class="py-24 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl reveal mb-16">
+        <h2 class="text-3xl font-extrabold tracking-tight"><span class="gradient-text">Proceso de trabajo</span> </h2>
+        <p class="mt-4 text-slate-300 leading-relaxed">
+          Implementación por fases para reducir fricción, asegurar adopción y evitar “automatizaciones frágiles”.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal relative overflow-hidden">
+          <div class="absolute -right-4 -top-4 text-9xl font-bold text-white/5 select-none">1</div>
+          <p class="text-xs text-indigo-400 font-bold uppercase tracking-wider relative z-10">Paso 1</p>
+          <h3 class="mt-2 font-bold text-white text-lg relative z-10">Análisis / Consultoría</h3>
+          <p class="mt-3 text-sm text-slate-300 relative z-10">Mapeo de procesos, cuellos de botella y quick wins con impacto.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal relative overflow-hidden" style="transition-delay: 100ms;">
+           <div class="absolute -right-4 -top-4 text-9xl font-bold text-white/5 select-none">2</div>
+          <p class="text-xs text-indigo-400 font-bold uppercase tracking-wider relative z-10">Paso 2</p>
+          <h3 class="mt-2 font-bold text-white text-lg relative z-10">Diseño técnico</h3>
+          <p class="mt-3 text-sm text-slate-300 relative z-10">Construcción del flujo, reglas de negocio, validación contigo.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal relative overflow-hidden" style="transition-delay: 200ms;">
+           <div class="absolute -right-4 -top-4 text-9xl font-bold text-white/5 select-none">3</div>
+          <p class="text-xs text-indigo-400 font-bold uppercase tracking-wider relative z-10">Paso 3</p>
+          <h3 class="mt-2 font-bold text-white text-lg relative z-10">Implementación y testing</h3>
+          <p class="mt-3 text-sm text-slate-300 relative z-10">Despliegue real, pruebas de errores, logs y alarmas.</p>
+        </div>
+        <div class="glass soft-ring rounded-2xl p-6 lift reveal relative overflow-hidden" style="transition-delay: 300ms;">
+           <div class="absolute -right-4 -top-4 text-9xl font-bold text-white/5 select-none">4</div>
+          <p class="text-xs text-indigo-400 font-bold uppercase tracking-wider relative z-10">Paso 4</p>
+          <h3 class="mt-2 font-bold text-white text-lg relative z-10">Formación y soporte</h3>
+          <p class="mt-3 text-sm text-slate-300 relative z-10">Documentación + capacitación para operar con autonomía.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="roi" class="py-24 border-y border-white/5 bg-slate-950/60 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-12 gap-16 items-start">
+        <div class="lg:col-span-5 reveal sticky top-24">
+          <h2 class="text-3xl font-extrabold tracking-tight"><span class="gradient-text">Prueba social y ROI</span></h2>
+          <p class="mt-4 text-slate-300 leading-relaxed">
+            Lo importante no es “automatizar por automatizar”. Es liberar horas, reducir errores y aumentar throughput.
+          </p>
+
+          <div class="mt-8 glass soft-ring rounded-2xl p-8 lift gradient-border">
+            <p class="text-sm text-slate-400 font-bold uppercase tracking-wider">Resultados medibles típicos</p>
+            <ul class="mt-4 space-y-3 text-slate-200">
+              <li class="flex items-center gap-3">
+                 <span class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs"><i class="fas fa-check"></i></span>
+                 <span>Ahorro de <strong>20+ horas semanales</strong> por cliente.</span>
+              </li>
+              <li class="flex items-center gap-3">
+                 <span class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs"><i class="fas fa-check"></i></span>
+                 <span>Recuperación de inversión en <strong>&lt;90 días</strong>.</span>
+              </li>
+              <li class="flex items-center gap-3">
+                 <span class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-xs"><i class="fas fa-check"></i></span>
+                 <span>Reducción de errores hasta <strong>90%</strong>.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 grid gap-6">
+          <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border">
+            <div class="flex gap-1 text-yellow-400 text-xs mb-3">★★★★★</div>
+            <p class="text-slate-100 leading-relaxed italic text-lg">
+              “Pasamos de perseguir datos a operar con trazabilidad. Se nos cayeron los errores manuales y el equipo ganó foco.
+              La atención al cliente mejoró en semanas.”
+            </p>
+            <div class="mt-4 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+              <p class="text-sm text-slate-400">— Operaciones, empresa de servicios</p>
+            </div>
+          </div>
+
+          <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border">
+             <div class="flex gap-1 text-yellow-400 text-xs mb-3">★★★★★</div>
+            <p class="text-slate-100 leading-relaxed italic text-lg">
+              “Integramos CRM, WhatsApp y facturación. Hoy tenemos seguimiento automático y priorización inteligente de leads.
+              El ciclo de respuesta bajó radicalmente.”
+            </p>
+            <div class="mt-4 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+              <p class="text-sm text-slate-400">— Ventas, negocio B2B</p>
+             </div>
+          </div>
+
+          <div class="glass soft-ring rounded-2xl p-8 lift reveal gradient-border">
+             <div class="flex gap-1 text-yellow-400 text-xs mb-3">★★★★★</div>
+            <p class="text-slate-100 leading-relaxed italic text-lg">
+              “Lo self-hosted fue clave: control total. Y cuando algo se complica, lo resuelven con código, no con excusas.”
+            </p>
+             <div class="mt-4 flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+              <p class="text-sm text-slate-400">— IT, empresa con stack propio</p>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="py-24 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl reveal mx-auto mb-16 text-center">
+        <h2 class="text-3xl font-extrabold tracking-tight"><span class="gradient-text">Preguntas frecuentes</span></h2>
+        <p class="mt-4 text-slate-300 leading-relaxed">
+          Respuestas directas. Si tu caso es especial, lo vemos en la consultoría.
+        </p>
+      </div>
+
+      <div class="mt-10 grid lg:grid-cols-2 gap-6">
+        <details class="glass soft-ring rounded-2xl p-6 group lift reveal cursor-pointer">
+          <summary class="list-none flex items-center justify-between gap-4 font-semibold text-white">
+            ¿Cuánto cuesta automatizar?
+            <span class="text-indigo-400 group-open:rotate-45 transition-transform duration-300 text-xl">+</span>
+          </summary>
+          <div class="mt-4 text-slate-300 text-sm leading-relaxed overflow-hidden transition-all duration-300">
+            Depende de complejidad y alcance. Trabajamos con <strong>presupuesto cerrado</strong> por proyecto y opciones de soporte mensual.
+          </div>
+        </details>
+
+        <details class="glass soft-ring rounded-2xl p-6 group lift reveal cursor-pointer">
+          <summary class="list-none flex items-center justify-between gap-4 font-semibold text-white">
+            ¿Están seguros mis datos?
+            <span class="text-indigo-400 group-open:rotate-45 transition-transform duration-300 text-xl">+</span>
+          </summary>
+          <div class="mt-4 text-slate-300 text-sm leading-relaxed overflow-hidden transition-all duration-300">
+            Sí. Con enfoque <strong>self-hosted</strong>, los datos permanecen en tu infraestructura. Además, aplicamos controles de acceso, logs y buenas prácticas.
+          </div>
+        </details>
+
+        <details class="glass soft-ring rounded-2xl p-6 group lift reveal cursor-pointer">
+          <summary class="list-none flex items-center justify-between gap-4 font-semibold text-white">
+            ¿Puedo migrar desde Make/Zapier?
+            <span class="text-indigo-400 group-open:rotate-45 transition-transform duration-300 text-xl">+</span>
+          </summary>
+          <div class="mt-4 text-slate-300 text-sm leading-relaxed overflow-hidden transition-all duration-300">
+            Sí. Podemos <strong>integrar</strong> lo existente o <strong>migrar</strong> progresivamente, priorizando flujos con mayor impacto.
+          </div>
+        </details>
+
+        <details class="glass soft-ring rounded-2xl p-6 group lift reveal cursor-pointer">
+          <summary class="list-none flex items-center justify-between gap-4 font-semibold text-white">
+            ¿Cuánto tarda un proyecto típico?
+            <span class="text-indigo-400 group-open:rotate-45 transition-transform duration-300 text-xl">+</span>
+          </summary>
+          <div class="mt-4 text-slate-300 text-sm leading-relaxed overflow-hidden transition-all duration-300">
+            Depende del número de sistemas y la criticidad del proceso. Lo normal: 1–3 semanas para un flujo sólido end-to-end.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="contacto" class="py-24 border-t border-white/5 bg-slate-950/60 animated-bg">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-12 gap-16 items-start">
+        <div class="lg:col-span-5 reveal">
+          <h2 class="text-3xl font-extrabold tracking-tight">Consulta inicial gratuita</h2>
+          <p class="mt-6 text-slate-300 leading-relaxed text-lg">
+            Cuéntanos tu proceso y tu stack. Te devolvemos un diagnóstico claro con oportunidades de automatización y un plan de implementación.
+          </p>
+
+          <div class="mt-10 glass soft-ring rounded-2xl p-8 lift gradient-border">
+            <p class="text-sm text-indigo-400 font-bold uppercase tracking-wider">Newsletter</p>
+            <p class="mt-2 text-slate-200 text-sm">Recibe avances prácticos sobre IA aplicada y automatización.</p>
+
+            <form class="mt-6 flex flex-col sm:flex-row gap-3" onsubmit="event.preventDefault(); alert('Gracias. Te contactaremos pronto.');">
+              <input
+                type="email"
+                required
+                placeholder="Tu email"
+                class="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-500/40 focus:bg-white/10 transition-all"
+              />
+              <button
+                type="submit"
+                class="rounded-xl bg-white text-slate-950 font-bold px-6 py-3 text-sm hover:bg-slate-200 transition cta-glow whitespace-nowrap"
+              >
+                Suscribirme
+              </button>
+            </form>
+          </div>
+        </div>
+
+<div class="lg:col-span-7 reveal">
+          <div class="glass soft-ring rounded-3xl p-8 lift gradient-border">
+            <form action="https://formspree.io/f/mgolwlpp" method="POST" class="grid sm:grid-cols-2 gap-6">
+              
+              <div class="sm:col-span-1">
+                <label class="text-xs text-slate-400 font-semibold uppercase">Nombre</label>
+                <input
+                  type="text"
+                  name="nombre"
+                  required
+                  class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:bg-white/10 transition-all"
+                  placeholder="Tu nombre"
+                />
+              </div>
+
+              <div class="sm:col-span-1">
+                <label class="text-xs text-slate-400 font-semibold uppercase">Empresa</label>
+                <input
+                  type="text"
+                  name="empresa"
+                  class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:bg-white/10 transition-all"
+                  placeholder="Nombre de empresa"
+                />
+              </div>
+
+              <div class="sm:col-span-1">
+                <label class="text-xs text-slate-400 font-semibold uppercase">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:bg-white/10 transition-all"
+                  placeholder="tucorreo@empresa.com"
+                />
+              </div>
+
+              <div class="sm:col-span-1">
+                <label class="text-xs text-slate-400 font-semibold uppercase">Interés principal</label>
+                <select
+                  name="interes"
+                  class="mt-2 w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:bg-white/10 transition-all appearance-none"
+                >
+                  <option value="Ventas / CRM" class="bg-slate-900">Ventas / CRM</option>
+                  <option value="Atencion al cliente" class="bg-slate-900">Atención al cliente</option>
+                  <option value="Finanzas / Facturacion" class="bg-slate-900">Finanzas / Facturación</option>
+                  <option value="RRHH" class="bg-slate-900">RRHH</option>
+                  <option value="Otro" class="bg-slate-900">Otro</option>
+                </select>
+              </div>
+              
+              <div class="sm:col-span-2 mt-4">
+                 <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-bold tracking-wide uppercase shadow-lg hover:shadow-purple-500/25 transition transform hover:-translate-y-1">Enviar Solicitud</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -50px 0px"
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal').forEach(el => {
+        observer.observe(el);
+      });
+    });
+  </script>
+
+</body>
+</html>
